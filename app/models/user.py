@@ -13,6 +13,7 @@ class User(Base):
     lastname = Column(String)
     age = Column(Integer)
     slug = Column(String, unique=True, index=True)
+    is_active = Column(Boolean, default=True)
     tasks = relationship("User", back_populates="user")
 
 
