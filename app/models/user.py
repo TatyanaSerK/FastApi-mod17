@@ -14,7 +14,7 @@ class User(Base):
     age = Column(Integer)
     slug = Column(String, unique=True, index=True)
     is_active = Column(Boolean, default=True)
-    tasks = relationship("User", back_populates="user")
+    tasks = relationship("Task", back_populates="user")
 
 
 from sqlalchemy.schema import CreateTable
