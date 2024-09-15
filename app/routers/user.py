@@ -55,8 +55,7 @@ async def update_user(db: Annotated[Session, Depends(get_db)], user_id: int,
         firstname=update_user_model.firstname,
         lastname=update_user_model.lastname,
         age=update_user_model.age,
-        slug=slugify(update_user_model.name),
-        tasks=update_user_model.tasks))
+        slug=slugify(update_user_model.name)))
     db.commit()
     return {
         'status_code': status.HTTP_200_OK,
