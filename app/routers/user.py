@@ -5,6 +5,7 @@ from slugify import slugify  # Функция создания slug-строки
 from typing import Annotated  # Аннотации, Модели БД и Pydantic.
 from app.backend.db_depends import get_db  # Функция подключения к БД
 from app.models.user import User
+from app.models.task import Task
 from app.schemas import CreateUser, UpdateUser
 
 router = APIRouter(prefix="/user", tags=["user"])
@@ -14,6 +15,30 @@ router = APIRouter(prefix="/user", tags=["user"])
 async def all_users(db: Annotated[Session, Depends(get_db)]):
     users = db.scalars(select(User).where(User.is_active == True)).all()
     return users
+
+@router.get("/user_id/tasks")
+async def tasks_by_user_id(db: Annotated[Session, Depends(get_db)], user_id: int):
+    user = db.scalar(select(User).where(User.id == user_id))
+    if user is None:
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User was not found'
+        )
+    tasks_user = db.scalars(select(Task).where(Task.user_id == user.id)).all()
+    task_and_user = [user.id] + [i.id for i in tasks_user]
+    task_by_user = db.scalars(
+        select(Task).where(User.user_id.in_(task_and_user),
+                              Task.is_active == True)).all()
+    return task_by_user
+
+
+    # subcategories = db.scalars(select(User).where(User.id == user.id)).all()
+    # categories_and_subcategories = [user.id] + [i.id for i in subcategories]
+    # products_category = db.scalars(
+    #     select(Task).where(Task.user_id.in_(categories_and_subcategories),
+    #                        Task.is_active == True,)).all()
+    # return products_category
+
 
 
 #

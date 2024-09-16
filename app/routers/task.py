@@ -29,14 +29,20 @@ async def task_by_id(db: Annotated[Session, Depends(get_db)], task_id: int):
 
 
 @router.post("/create")
-async def create_task(db: Annotated[Session, Depends(get_db)], create_task_mod: CreateTask):
-    db.execute(insert(User).values(id=create_task_mod.id,
+async def create_task(db: Annotated[Session, Depends(get_db)], user_id: int, create_task_mod: CreateTask):
+    user = db.scalar(select(User).where(User.id == user_id))
+    if user is None:
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User was not found'
+        )
+
+    db.execute(insert(Task).values(
                                    title=create_task_mod.title,
                                    content=create_task_mod.content,
                                    priority=create_task_mod.priority,
-                                   user_id=create_task_mod.user_id,
-                                   slug=slugify(create_task_mod.name),
-                                   user=create_task_mod.user))
+                                   # user_id=create_task_mod.user_id,
+                                   slug=slugify(create_task_mod.name)))
     db.commit()
     return {
         'status_code': status.HTTP_201_CREATED,
@@ -56,8 +62,7 @@ async def update_task(db: Annotated[Session, Depends(get_db)], task_id: int,
         content=update_task_model.content,
         priority=update_task_model.priority,
         user_id=update_task_model.user_id,
-        slug=slugify(update_task_model.name),
-        user=update_task_model.user))
+        slug=slugify(update_task_model.name)))
     db.commit()
     return {
         'status_code': status.HTTP_200_OK,
