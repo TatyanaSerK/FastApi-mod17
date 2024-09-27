@@ -76,7 +76,8 @@ async def delete_task(db: Annotated[Session, Depends(get_db)], task_id: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User was not found'
         )
-    db.execute(update(Task).where(Task.id == task_id).values(is_active=False))
+
+    db.delete(task_delete)
     db.commit()
     return {
         'status_code': status.HTTP_200_OK,
